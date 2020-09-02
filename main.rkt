@@ -1,50 +1,19 @@
 #lang racket/base
 
-(module+ test
-  (require rackunit))
-
-;; Notice
-;; To install (from within the package directory):
-;;   $ raco pkg install
-;; To install (once uploaded to pkgs.racket-lang.org):
-;;   $ raco pkg install <<name>>
-;; To uninstall:
-;;   $ raco pkg remove <<name>>
-;; To view documentation:
-;;   $ raco docs <<name>>
-;;
-;; For your convenience, we have included LICENSE-MIT and LICENSE-APACHE files.
-;; If you would prefer to use a different license, replace those files with the
-;; desired license.
-;;
-;; Some users like to add a `private/` directory, place auxiliary files there,
-;; and require them in `main.rkt`.
-;;
-;; See the current version of the racket style guide here:
-;; http://docs.racket-lang.org/style/index.html
-
-;; Code here
-
-
-
-(module+ test
-  ;; Any code in this `test` submodule runs when this file is run using DrRacket
-  ;; or with `raco test`. The code here does not run when this file is
-  ;; required by another module.
-
-  (check-equal? (+ 2 2) 4))
-
 (module+ main
-  ;; (Optional) main submodule. Put code here if you need it to be executed when
-  ;; this file is run using DrRacket or the `racket` executable.  The code here
-  ;; does not run when this file is required by another module. Documentation:
-  ;; http://docs.racket-lang.org/guide/Module_Syntax.html#%28part._main-and-test%29
+  (define image-width 256)
+  (define image-height 256)
 
-  (require racket/cmdline)
-  (define who (box "world"))
-  (command-line
-    #:program "my-program"
-    #:once-each
-    [("-n" "--name") name "Who to say hello to" (set-box! who name)]
-    #:args ()
-    (printf "hello ~a~n" (unbox who))))
+  (printf "P3~n ~a ~a~n255~n" image-width image-height)
+
+  (for ([j (in-range (- image-height 1) 0 -1)])
+    (for ([i (in-range 0 image-width)])
+      (define r (/ i (- image-width 1)))
+      (define g (/ j (- image-height 1)))
+      (define b 0.25)
+
+      (define ir (inexact->exact (truncate (* 255.99 r))))
+      (define ig (inexact->exact (truncate (* 255.99 g))))
+      (define ib (inexact->exact (truncate (* 255.99 b))))
+
+      (printf "~a ~a ~a~n" ir ig ib))))
