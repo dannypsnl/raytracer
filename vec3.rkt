@@ -10,8 +10,15 @@
      (fprintf port "~a ~a ~a" (vec3-x v) (vec3-y v) (vec3-z v)))]
   #:transparent
   #:mutable)
-(define point3 vec3)
-(define color vec3)
+(struct color vec3 ()
+  #:methods gen:custom-write
+  [(define (write-proc c port mode)
+     (fprintf port "~a ~a ~a~n"
+              (inexact->exact (truncate (* 255.99 (vec3-x c))))
+              (inexact->exact (truncate (* 255.99 (vec3-y c))))
+              (inexact->exact (truncate (* 255.99 (vec3-z c))))))]
+  #:transparent)
+(struct point3 vec3 () #:transparent)
 
 (define (vec3-length-squared v)
   (match v
