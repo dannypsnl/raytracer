@@ -1,6 +1,11 @@
 #lang racket
 
-(struct vec3 (x y z) #:transparent #:mutable)
+(struct vec3 (x y z)
+  #:methods gen:custom-write
+  [(define (write-proc v port mode)
+     (fprintf port "~a ~a ~a" (vec3-x v) (vec3-y v) (vec3-z v)))]
+  #:transparent
+  #:mutable)
 (define point3 vec3)
 (define color vec3)
 
