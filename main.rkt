@@ -7,6 +7,7 @@
   (printf "P3~n ~a ~a~n255~n" image-width image-height)
 
   (for ([j (in-range (- image-height 1) 0 -1)])
+    (eprintf "Scanlines remaining: ~a~n" j)
     (for ([i (in-range 0 image-width)])
       (define r (/ i (- image-width 1)))
       (define g (/ j (- image-height 1)))
@@ -16,4 +17,6 @@
       (define ig (inexact->exact (truncate (* 255.99 g))))
       (define ib (inexact->exact (truncate (* 255.99 b))))
 
-      (printf "~a ~a ~a~n" ir ig ib))))
+      (printf "~a ~a ~a~n" ir ig ib)))
+
+  (eprintf "~nDone.~n"))
