@@ -2,6 +2,8 @@
 
 (provide (all-defined-out))
 
+(module+ test
+  (require rackunit))
 (require racket/performance-hint)
 
 (struct vec3 (x y z)
@@ -75,3 +77,7 @@
            (- (* x y1) (* y x1)))]))
 (define-inline (unit-vector v)
   (vec3-/ v (vec3-length v)))
+
+(module+ test
+  (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0))
+                (vec3 2 2 3)))
