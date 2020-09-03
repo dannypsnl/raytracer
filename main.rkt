@@ -6,15 +6,19 @@
 
 (define/contract (hit-sphere center radius r)
   (-> point3? number? ray? number?)
+  ; NOTE: convertion
+  ; (-b^2 +- √b^2 - 4ac) / 2a
+  ; -> (-2h^2 +- √(2h)^2 - 4ac) / 2a
+  ; -> (-2h^2 +- 2√h^2 - ac) / 2a
+  ; -> (-h^2 +- √h^2 - ac) / a
   (define oc (vec3-- (ray-origin r) center))
-  (define a (dot (ray-direction r) (ray-direction r)))
-  (define b (* 2.0 (dot oc (ray-direction r))))
-  (define c (- (dot oc oc) (* radius radius)))
-  (define discriminant (- (* b b)
-                          (* 4 a c)))
+  (define a (vec3-length-squared (ray-direction r)))
+  (define h (dot oc (ray-direction r)))
+  (define c (- (vec3-length-squared oc) (* radius radius)))
+  (define discriminant (- (* h h) (* a c)))
   (if (discriminant . < . 0)
       -1.0
-      (/ (- (- b) (sqrt discriminant)) (* 2.0 a))))
+      (/ (- (- h) (sqrt discriminant)) a)))
 
 (define (ray-color r)
   (define t (hit-sphere (point3 0 0 -1) 0.5 r))
