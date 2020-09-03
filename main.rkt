@@ -1,6 +1,5 @@
-#lang racket/base
+#lang racket
 
-(require racket/contract)
 (require "vec3.rkt"
          "ray.rkt")
 
