@@ -6,8 +6,9 @@
 (define (ray-color r)
   (define unit-direction (unit-vector (ray-direction r)))
   (define t (* 0.5 (+ (vec3-y unit-direction) 1.0)))
-  (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
-          (vec3-* t (color 0.5 0.7 1.0))))
+  (let ([v (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
+                   (vec3-* t (color 0.5 0.7 1.0)))])
+    (color (vec3-x v) (vec3-y v) (vec3-z v))))
 
 (module+ main
   ; Image
@@ -33,10 +34,11 @@
     (for ([i (in-range 0 image-width)])
       (define u (/ i (- image-width 1)))
       (define v (/ j (- image-height 1)))
-      (define r (ray origin (vec3-- (vec3-+ lower-left-corner
-                                            (vec3-+ (vec3-* u horizontal)
-                                                    (vec3-* v vertical)))
-                                    origin)))
+      (define r (ray origin
+                     (vec3-- (vec3-+ lower-left-corner
+                                     (vec3-+ (vec3-* u horizontal)
+                                             (vec3-* v vertical)))
+                             origin)))
       (define pixel-color (ray-color r))
       (printf "~a" pixel-color)))
 

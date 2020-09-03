@@ -60,10 +60,10 @@
   (match* (u v)
     [((vec3 x y z) (vec3 x1 y1 z1))
      (vec3 (* x x1) (* y y1) (* z z1))]
-    [((vec3 x y z) (? number?))
-     (vec3 (* x v) (* y v) (* z v))]
-    [((? number?) (vec3 x y z))
-     (vec3-* v u)]))
+    [((vec3 x y z) t) #:when (number? t)
+     (vec3 (* x t) (* y t) (* z t))]
+    [(t (vec3 x y z)) #:when (number? t)
+     (vec3-* v t)]))
 (define-inline (vec3-/ v t)
   (vec3-* (/ 1 t) v))
 (define-inline (dot u v)
