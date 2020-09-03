@@ -61,10 +61,11 @@
     [((vec3 x y z) (vec3 x1 y1 z1))
      (vec3 (* x x1) (* y y1) (* z z1))]
     [((vec3 x y z) (? number?))
-     (vec3 (* x u) (* y u) (* z u))]
-    [((? number?) (vec3 x y z)) (vec3-* v u)]))
+     (vec3 (* x v) (* y v) (* z v))]
+    [((? number?) (vec3 x y z))
+     (vec3-* v u)]))
 (define-inline (vec3-/ v t)
-  (vec3-* (1 . / . t) v))
+  (vec3-* (/ 1 t) v))
 (define-inline (dot u v)
   (match* (u v)
     [((vec3 x y z) (vec3 x1 y1 z1))
@@ -80,4 +81,14 @@
 
 (module+ test
   (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0))
-                (vec3 2 2 3)))
+                (vec3 2 2 3))
+  (check-equal? (vec3-- (vec3 1 2 3) (vec3 1 0 0))
+                (vec3 0 2 3))
+  (check-equal? (vec3-* (vec3 1 2 3) 2)
+                (vec3 2 4 6))
+  (check-equal? (vec3-* 2 (vec3 1 2 3))
+                (vec3 2 4 6))
+  (check-equal? (vec3-* (vec3 1 2 3) (vec3 1 2 3))
+                (vec3 1 4 9))
+  (check-equal? (vec3-/ (vec3 1 2 3) 2)
+                (vec3 1/2 1 3/2)))
