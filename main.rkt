@@ -4,24 +4,28 @@
 (require "vec3.rkt"
          "ray.rkt")
 
-(define/contract (hit-sphere? center radius r)
-  (-> point3? number? ray? boolean?)
+(define/contract (hit-sphere center radius r)
+  (-> point3? number? ray? number?)
   (define oc (vec3-- (ray-origin r) center))
   (define a (dot (ray-direction r) (ray-direction r)))
   (define b (* 2.0 (dot oc (ray-direction r))))
   (define c (- (dot oc oc) (* radius radius)))
   (define discriminant (- (* b b)
                           (* 4 a c)))
-  (discriminant . > . 0))
+  (if (discriminant . < . 0)
+      -1.0
+      (/ (- (- b) (sqrt discriminant)) (* 2.0 a))))
 
 (define (ray-color r)
-  (if (hit-sphere? (point3 0 0 -1) 0.5 r)
-      (color 1 0 0)
+  (define t (hit-sphere (point3 0 0 -1) 0.5 r))
+  (if (t . > . 0)
+      (let ([N (unit-vector (vec3-- (ray-at r t) (vec3 0 0 -1)))])
+        (vec3->color (vec3-* 0.5
+                             (color (+ 1 (vec3-x N)) (+ 1 (vec3-y N)) (+ 1 (vec3-z N))))))
       (let* ([unit-direction (unit-vector (ray-direction r))]
-             [t (* 0.5 (+ (vec3-y unit-direction) 1.0))]
-             [v (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
-                        (vec3-* t (color 0.5 0.7 1.0)))])
-        (color (vec3-x v) (vec3-y v) (vec3-z v)))))
+             [t (* 0.5 (+ (vec3-y unit-direction) 1.0))])
+        (vec3->color (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
+                             (vec3-* t (color 0.5 0.7 1.0)))))))
 
 (module+ main
   ; Image

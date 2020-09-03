@@ -22,6 +22,9 @@
   #:transparent)
 (struct point3 vec3 () #:transparent)
 
+(define (vec3->color v)
+  (color (vec3-x v) (vec3-y v) (vec3-z v)))
+
 (define (vec3-length-squared v)
   (match v
     [(vec3 x y z) (+ (* x x) (* y y) (* z z))]))
