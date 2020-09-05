@@ -15,10 +15,11 @@
 (struct color vec3 ()
   #:methods gen:custom-write
   [(define (write-proc c port mode)
-     (fprintf port "~a ~a ~a~n"
-              (inexact->exact (truncate (* 255.99 (vec3-x c))))
-              (inexact->exact (truncate (* 255.99 (vec3-y c))))
-              (inexact->exact (truncate (* 255.99 (vec3-z c))))))]
+     (match-let ([(vec3 x y z) c])
+       (fprintf port "~a ~a ~a~n"
+                (inexact->exact (truncate (* 255.99 x)))
+                (inexact->exact (truncate (* 255.99 y)))
+                (inexact->exact (truncate (* 255.99 z))))))]
   #:transparent)
 (struct point3 vec3 () #:transparent)
 
@@ -32,53 +33,51 @@
   (sqrt (vec3-length-squared v)))
 
 (define (vec3-neg v)
-  (match v
-    [(vec3 x y z)
-     (vec3 (- x) (- y) (- z))]))
+  (match-let ([(vec3 x y z) v])
+    (vec3 (- x) (- y) (- z))))
 
 (define (vec3-+= v v1)
-  (match* (v v1)
-    [((vec3 x y z) (vec3 x1 y1 z1))
-     (set-vec3-x! v (+ x x1))
-     (set-vec3-y! v (+ y y1))
-     (set-vec3-z! v (+ z z1))]))
+  (match-let ([(vec3 x y z) v]
+              [(vec3 x1 y1 z1) v1])
+    (set-vec3-x! v (+ x x1))
+    (set-vec3-y! v (+ y y1))
+    (set-vec3-z! v (+ z z1))))
 (define (vec3-*= v t)
-  (match v
-    [(vec3 x y z)
-     (set-vec3-x! v (* x t))
-     (set-vec3-y! v (* y t))
-     (set-vec3-z! v (* z t))]))
+  (match-let ([(vec3 x y z) v])
+    (set-vec3-x! v (* x t))
+    (set-vec3-y! v (* y t))
+    (set-vec3-z! v (* z t))))
 (define (vec3-/= v t)
   (vec3-*= v (/ 1 t)))
 
 (define-inline (vec3-+ u v)
-  (match* (u v)
-    [((vec3 x y z) (vec3 x1 y1 z1))
-     (vec3 (+ x x1) (+ y y1) (+ z z1))]))
+  (match-let ([(vec3 x y z) u]
+              [(vec3 x1 y1 z1) v])
+    (vec3 (+ x x1) (+ y y1) (+ z z1))))
 (define-inline (vec3-- u v)
-  (match* (u v)
-    [((vec3 x y z) (vec3 x1 y1 z1))
-     (vec3 (- x x1) (- y y1) (- z z1))]))
+  (match-let ([(vec3 x y z) u]
+              [(vec3 x1 y1 z1) v])
+    (vec3 (- x x1) (- y y1) (- z z1))))
 (define-inline (vec3-* u v)
   (match* (u v)
     [((vec3 x y z) (vec3 x1 y1 z1))
      (vec3 (* x x1) (* y y1) (* z z1))]
     [((vec3 x y z) t) #:when (number? t)
-     (vec3 (* x t) (* y t) (* z t))]
+                      (vec3 (* x t) (* y t) (* z t))]
     [(t (vec3 x y z)) #:when (number? t)
-     (vec3-* v t)]))
+                      (vec3-* v t)]))
 (define-inline (vec3-/ v t)
   (vec3-* (/ 1 t) v))
 (define-inline (dot u v)
-  (match* (u v)
-    [((vec3 x y z) (vec3 x1 y1 z1))
-     (+ (* x x1) (* y y1) (* z z1))]))
+  (match-let ([(vec3 x y z) u]
+              [(vec3 x1 y1 z1) v])
+    (+ (* x x1) (* y y1) (* z z1))))
 (define-inline (cross u v)
-  (match* (u v)
-    [((vec3 x y z) (vec3 x1 y1 z1))
-     (vec3 (- (* y z1) (* z y1))
-           (- (* z x1) (* x z1))
-           (- (* x y1) (* y x1)))]))
+  (match-let ([(vec3 x y z) u]
+              [(vec3 x1 y1 z1) v])
+    (vec3 (- (* y z1) (* z y1))
+          (- (* z x1) (* x z1))
+          (- (* x y1) (* y x1)))))
 (define-inline (unit-vector v)
   (vec3-/ v (vec3-length v)))
 
