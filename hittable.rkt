@@ -59,6 +59,7 @@
 (define (set-hit-record-face-normal! rec r outward-normal)
   (define front-face ((dot (ray-direction r) outward-normal) . < . 0))
   (set-hit-record-normal!
+   rec
    (if front-face
        outward-normal
        (vec3-neg outward-normal))))
