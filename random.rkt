@@ -1,5 +1,7 @@
 #lang racket
 
+(provide random-double)
+
 (require racket/performance-hint)
 
 (define-inline (random-double [min 0] [max 1])

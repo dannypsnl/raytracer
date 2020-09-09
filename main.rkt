@@ -3,7 +3,9 @@
 (require "vec3.rkt"
          "ray.rkt"
          "meta.rkt"
-         "hittable.rkt")
+         "hittable.rkt"
+         "camera.rkt"
+         "random.rkt")
 
 (define (ray-color r world)
   (define rec (hit-record #f #f #f #f))
@@ -26,29 +28,20 @@
                  (sphere (point3 0 -100.5 -1) 100)))
 
   ; Camera
-  (define viewport-height 2.0)
-  (define viewport-width (* aspect-ratio viewport-height))
-  (define focal-length 1.0)
+  (define cam (mk-camera))
 
-  (define origin (point3 0 0 0))
-  (define horizontal (vec3 viewport-width 0 0))
-  (define vertical (vec3 0 viewport-height 0))
-  (define lower-left-corner
-    (vec3-- origin (vec3-/ horizontal 2) (vec3-/ vertical 2) (vec3 0 0 focal-length)))
-
+  ; Render
   (printf "P3~n ~a ~a~n255~n" image-width image-height)
 
   (for ([j (in-range (- image-height 1) 0 -1)])
     (eprintf "Scanlines remaining: ~a~n" j)
     (for ([i (in-range 0 image-width)])
-      (define u (/ i (- image-width 1)))
-      (define v (/ j (- image-height 1)))
-      (define r (ray origin
-                     (vec3-- (vec3-+ lower-left-corner
-                                     (vec3-+ (vec3-* u horizontal)
-                                             (vec3-* v vertical)))
-                             origin)))
-      (define pixel-color (ray-color r world))
-      (printf "~a" pixel-color)))
+      (define pixel-color (color 0 0 0))
+      (for ([s (in-range 0 samples-per-pixel)])
+        (define u (/ (+ i (random-double)) (- image-width 1)))
+        (define v (/ (+ j (random-double)) (- image-height 1)))
+        (define r (camera-get-ray cam u v))
+        (vec3-+= pixel-color (ray-color r world)))
+      (printf "~a~n" pixel-color)))
 
   (eprintf "~nDone.~n"))

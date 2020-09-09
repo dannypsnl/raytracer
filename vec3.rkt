@@ -12,14 +12,25 @@
      (fprintf port "~a ~a ~a" (vec3-x v) (vec3-y v) (vec3-z v)))]
   #:transparent
   #:mutable)
+
+(define-inline (clamp x min max)
+  (cond
+    [(< x min) min]
+    [(> x max) max]
+    [else x]))
+(define samples-per-pixel 100)
 (struct color vec3 ()
   #:methods gen:custom-write
   [(define (write-proc c port mode)
-     (match-let ([(vec3 x y z) c])
-       (fprintf port "~a ~a ~a~n"
-                (inexact->exact (truncate (* 255.99 x)))
-                (inexact->exact (truncate (* 255.99 y)))
-                (inexact->exact (truncate (* 255.99 z))))))]
+     (match-let ([(vec3 r g b) c])
+       (let* ([scale (/ 1.0 samples-per-pixel)]
+              [r (* r scale)]
+              [g (* g scale)]
+              [b (* b scale)])
+         (fprintf port "~a ~a ~a~n"
+                  (inexact->exact (truncate (* 256 (clamp r 0.0 0.999))))
+                  (inexact->exact (truncate (* 256 (clamp g 0.0 0.999))))
+                  (inexact->exact (truncate (* 256 (clamp b 0.0 0.999))))))))]
   #:transparent)
 (struct point3 vec3 () #:transparent)
 
