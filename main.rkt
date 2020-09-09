@@ -34,7 +34,7 @@
   (define horizontal (vec3 viewport-width 0 0))
   (define vertical (vec3 0 viewport-height 0))
   (define lower-left-corner
-    (vec3-- (vec3-- (vec3-- origin (vec3-/ horizontal 2)) (vec3-/ vertical 2)) (vec3 0 0 focal-length)))
+    (vec3-- origin (vec3-/ horizontal 2) (vec3-/ vertical 2) (vec3 0 0 focal-length)))
 
   (printf "P3~n ~a ~a~n255~n" image-width image-height)
 

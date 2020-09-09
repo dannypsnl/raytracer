@@ -62,4 +62,4 @@
    rec
    (if front-face
        outward-normal
-       (vec3-neg outward-normal))))
+       (vec3-- outward-normal))))

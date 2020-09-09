@@ -32,10 +32,6 @@
 (define (vec3-length v)
   (sqrt (vec3-length-squared v)))
 
-(define (vec3-neg v)
-  (match-let ([(vec3 x y z) v])
-    (vec3 (- x) (- y) (- z))))
-
 (define (vec3-+= v v1)
   (match-let ([(vec3 x y z) v]
               [(vec3 x1 y1 z1) v1])
@@ -50,14 +46,24 @@
 (define (vec3-/= v t)
   (vec3-*= v (/ 1 t)))
 
-(define-inline (vec3-+ u v)
+(define-inline (vec3-+ u v . v*)
   (match-let ([(vec3 x y z) u]
               [(vec3 x1 y1 z1) v])
-    (vec3 (+ x x1) (+ y y1) (+ z z1))))
-(define-inline (vec3-- u v)
-  (match-let ([(vec3 x y z) u]
-              [(vec3 x1 y1 z1) v])
-    (vec3 (- x x1) (- y y1) (- z z1))))
+    (let ([r (vec3 (+ x x1) (+ y y1) (+ z z1))])
+      (match v*
+        [(? empty?) r]
+        [`(,a) (vec3-+ r (car v*))]
+        [else (vec3-+ r (car v*) (cdr v*))]))))
+
+(define-inline (vec3-- u . v*)
+  (if (empty? v*)
+      (match-let ([(vec3 x y z) u])
+        (vec3 (- x) (- y) (- z)))
+      (foldl (λ (v rv)
+               (vec3-+ rv (vec3-- v)))
+             u
+             v*)))
+
 (define-inline (vec3-* u v)
   (match* (u v)
     [((vec3 x y z) (vec3 x1 y1 z1))
@@ -66,6 +72,7 @@
                       (vec3 (* x t) (* y t) (* z t))]
     [(t (vec3 x y z)) #:when (number? t)
                       (vec3-* v t)]))
+
 (define-inline (vec3-/ v t)
   (vec3-* (/ 1 t) v))
 (define-inline (dot u v)
@@ -82,10 +89,10 @@
   (vec3-/ v (vec3-length v)))
 
 (module+ test
-  (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0))
-                (vec3 2 2 3))
-  (check-equal? (vec3-- (vec3 1 2 3) (vec3 1 0 0))
-                (vec3 0 2 3))
+  (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))
+                (vec3 3 2 3))
+  (check-equal? (vec3-- (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))
+                (vec3 -1 2 3))
   (check-equal? (vec3-* (vec3 1 2 3) 2)
                 (vec3 2 4 6))
   (check-equal? (vec3-* 2 (vec3 1 2 3))
