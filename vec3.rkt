@@ -25,9 +25,9 @@
          [else x]))
      (match-let ([(vec3 r g b) c])
        (let* ([scale (/ 1.0 samples-per-pixel)]
-              [r (* r scale)]
-              [g (* g scale)]
-              [b (* b scale)])
+              [r (sqrt (* r scale))]
+              [g (sqrt (* g scale))]
+              [b (sqrt (* b scale))])
          (fprintf port "~a ~a ~a~n"
                   (inexact->exact (truncate (* 256 (clamp r 0.0 0.999))))
                   (inexact->exact (truncate (* 256 (clamp g 0.0 0.999))))
