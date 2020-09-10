@@ -12,7 +12,7 @@
 
   (if (<= depth 0)
       (color 0 0 0)
-      (if (and (hit? world r 0 +inf.0 rec) (hit-record-normal rec))
+      (if (and (hit? world r 0.001 +inf.0 rec) (hit-record-normal rec))
           (let* ([rec.p (hit-record-p rec)]
                  [target (vec3-+ rec.p (hit-record-normal rec) (random-in-unit-sphere))])
             (vec3->color (vec3-* 0.5 (ray-color (ray rec.p (vec3-- target rec.p)) world (- depth 1)))))
