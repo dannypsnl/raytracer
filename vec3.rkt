@@ -100,13 +100,13 @@
 (define-inline (unit-vector v)
   (vec3-/ v (vec3-length v)))
 
-(define (random-in-unit-sphere)
-  (define-inline (random-vec3 min max)
-    (vec3 (random-double min max) (random-double min max) (random-double min max)))
-  (define p (random-vec3 -1 1))
-  (if (>= (vec3-length-squared p) 1)
-      (random-in-unit-sphere)
-      p))
+(define (random-unit-vec3)
+  (let* ([a (random-double 0 (* 2 pi))]
+         [z (random-double -1 1)]
+         [r (sqrt (- 1 (* z z)))])
+    (vec3 (* r (cos a))
+          (* r (sin a))
+          z)))
 
 (module+ test
   (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))
