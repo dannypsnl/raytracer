@@ -5,6 +5,7 @@
 (module+ test
   (require rackunit))
 (require racket/performance-hint)
+(require "random.rkt")
 
 (struct vec3 (x y z)
   #:methods gen:custom-write
@@ -13,15 +14,15 @@
   #:transparent
   #:mutable)
 
-(define-inline (clamp x min max)
-  (cond
-    [(< x min) min]
-    [(> x max) max]
-    [else x]))
 (define samples-per-pixel 100)
 (struct color vec3 ()
   #:methods gen:custom-write
   [(define (write-proc c port mode)
+     (define-inline (clamp x min max)
+       (cond
+         [(< x min) min]
+         [(> x max) max]
+         [else x]))
      (match-let ([(vec3 r g b) c])
        (let* ([scale (/ 1.0 samples-per-pixel)]
               [r (* r scale)]
@@ -98,6 +99,14 @@
           (- (* x y1) (* y x1)))))
 (define-inline (unit-vector v)
   (vec3-/ v (vec3-length v)))
+
+(define (random-in-unit-sphere)
+  (define-inline (random-vec3 min max)
+    (vec3 (random-double min max) (random-double min max) (random-double min max)))
+  (define p (random-vec3 -1 1))
+  (if (>= (vec3-length-squared p) 1)
+      (random-in-unit-sphere)
+      p))
 
 (module+ test
   (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))

@@ -36,18 +36,18 @@
          (define discriminant (- (* h h) (* a c)))
          (if (discriminant . > . 0)
              (let* ([root (sqrt discriminant)]
-                    [temp (/ (- (- h) root) a)])
+                    [temp (/ (- (+ h root)) a)])
                (when (and (temp . < . max) (temp . > . min))
                  (set-hit-record-t! rec temp)
                  (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
                  (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
                  (return #t))
-               (set! temp (/ (+ (- h) root) a))
+               (set! temp (/ (- root h) a))
                (when (and (temp . < . max) (temp . > . min))
                  (begin
                    (set-hit-record-t! rec temp)
                    (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
-                   (set-hit-record-face-normal! rec r (vec3-/ (- (hit-record-p rec) center) radius))
+                   (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
                    (return #t))))
              #f)))]))
 
