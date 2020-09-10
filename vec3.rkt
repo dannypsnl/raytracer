@@ -50,6 +50,7 @@
     (set-vec3-x! v (+ x x1))
     (set-vec3-y! v (+ y y1))
     (set-vec3-z! v (+ z z1))))
+
 (define (vec3-*= v t)
   (match-let ([(vec3 x y z) v])
     (set-vec3-x! v (* x t))
@@ -107,6 +108,9 @@
     (vec3 (* r (cos a))
           (* r (sin a))
           z)))
+
+(define (reflect v n)
+  (vec3-- v (vec3-* (* 2 (dot v n)) n)))
 
 (module+ test
   (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))

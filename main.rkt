@@ -8,18 +8,22 @@
          "random.rkt")
 
 (define (ray-color r world depth)
-  (define rec (hit-record #f #f #f #f))
+  (define rec (hit-record #f #f #f #f #f))
 
   (if (<= depth 0)
       (color 0 0 0)
-      (if (and (hit? world r 0.001 +inf.0 rec) (hit-record-normal rec))
-          (let* ([rec.p (hit-record-p rec)]
-                 [target (vec3-+ rec.p (hit-record-normal rec) (random-unit-vec3))])
-            (vec3->color (vec3-* 0.5 (ray-color (ray rec.p (vec3-- target rec.p)) world (- depth 1)))))
+      (if (hit? world r 0.001 +inf.0 rec)
+          (let* ([rec.mat_ptr (hit-record-mat-ptr rec)]
+                 [scattered+attenuation? (scatter rec.mat_ptr r rec)])
+            (if scattered+attenuation?
+                (let ([scattered (car scattered+attenuation?)]
+                      [attenuation (cdr scattered+attenuation?)])
+                  (vec3-* attenuation (ray-color scattered world (- depth 1))))
+                (color 0 0 0)))
           (let* ([unit-direction (unit-vector (ray-direction r))]
                  [t (* 0.5 (+ (vec3-y unit-direction) 1.0))])
-            (vec3->color (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
-                                 (vec3-* t (color 0.5 0.7 1.0))))))))
+            (vec3-+ (vec3-* (- 1.0 t) (color 1.0 1.0 1.0))
+                    (vec3-* t (color 0.5 0.7 1.0)))))))
 
 (module+ main
   ; Image
@@ -29,9 +33,15 @@
   (define max-depth 50)
 
   ; World
+  (define material-ground (lambertian (color 0.8 0.8 0.0)))
+  (define material-center (lambertian (color 0.7 0.3 0.3)))
+  (define material-left (metal (color 0.8 0.8 0.8)))
+  (define material-right (metal (color 0.8 0.6 0.2)))
   (define world (list
-                 (sphere (point3 0 0 -1) 0.5)
-                 (sphere (point3 0 -100.5 -1) 100)))
+                 (sphere (point3 0.0 -100.5 -1.0) 100.0 material-ground)
+                 (sphere (point3 0.0 0.0 -1.0) 0.5 material-center)
+                 (sphere (point3 -1.0 0.0 -1.0) 0.5 material-left)
+                 (sphere (point3 1.0 0.0 -1.0) 0.5 material-right)))
 
   ; Camera
   (define cam (mk-camera))
@@ -47,7 +57,7 @@
         (define u (/ (+ i (random-double)) (- image-width 1)))
         (define v (/ (+ j (random-double)) (- image-height 1)))
         (define r (camera-get-ray cam u v))
-        (vec3-+= pixel-color (ray-color r world max-depth)))
+        (vec3-+= pixel-color (vec3->color (ray-color r world max-depth))))
       (printf "~a~n" pixel-color)))
 
   (eprintf "~nDone.~n"))
