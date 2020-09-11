@@ -109,6 +109,14 @@
           (* r (sin a))
           z)))
 
+(define (random-in-unit-sphere)
+  (define (vec3-random min max)
+    (vec3 (random-double min max) (random-double min max) (random-double min max)))
+  (define p (vec3-random -1 1))
+  (if (>= (vec3-length-squared p) 1)
+      (random-in-unit-sphere)
+      p))
+
 (define (reflect v n)
   (vec3-- v (vec3-* (* 2 (dot v n)) n)))
 

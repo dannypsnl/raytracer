@@ -57,12 +57,7 @@
 
 (struct sphere (center radius mat-ptr) #:transparent)
 
-(struct hit-record
-  (p
-   normal
-   mat-ptr
-   t
-   front-face)
+(struct hit-record (p normal mat-ptr t front-face)
   #:mutable #:transparent)
 
 (define (set-hit-record-face-normal! rec r outward-normal)
@@ -74,12 +69,15 @@
     [(lambertian albedo)
      (define scatter-direction (vec3-+ (hit-record-normal rec) (random-unit-vec3)))
      (cons (ray (hit-record-p rec) scatter-direction) albedo)]
-    [(metal albedo)
+    [(metal albedo fuzz)
      (define reflected (reflect (unit-vector (ray-direction r-in)) (hit-record-normal rec)))
-     (define scattered (ray (hit-record-p rec) reflected))
+     (define scattered (ray (hit-record-p rec) (vec3-+ reflected (vec3-* fuzz (random-in-unit-sphere)))))
      (if (> (dot (ray-direction scattered) (hit-record-normal rec)) 0)
          (cons scattered albedo)
          #f)]))
 
 (struct lambertian (albedo) #:transparent)
-(struct metal (albedo) #:transparent)
+(struct metal (albedo fuzz) #:transparent)
+
+(define (mk-metal a f)
+  (metal a (if (< f 1) f 1)))
