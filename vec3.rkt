@@ -120,6 +120,12 @@
 (define (reflect v n)
   (vec3-- v (vec3-* (* 2 (dot v n)) n)))
 
+(define (refract uv n etai-over-etat)
+  (let* ([cos-theta (dot (vec3-- uv) n)]
+         [r-out-perp (vec3-* etai-over-etat (vec3-+ uv (vec3-* cos-theta n)))]
+         [r-out-parallel (vec3-* (- (sqrt (abs (- 1.0 (vec3-length-squared r-out-perp))))) n)])
+    (vec3-+ r-out-perp r-out-parallel)))
+
 (module+ test
   (check-equal? (vec3-+ (vec3 1 2 3) (vec3 1 0 0) (vec3 1 0 0))
                 (vec3 3 2 3))
