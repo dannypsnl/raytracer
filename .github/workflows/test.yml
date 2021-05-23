@@ -7,6 +7,7 @@ on:
     branches:
     - '*'
     paths:
+    - '**test.yml'
     - '**.rkt'
     - '**.scrbl'
   pull_request:
@@ -24,7 +25,7 @@ jobs:
     strategy:
       matrix:
         racket-variant: [ 'BC', 'CS' ]
-        racket-version: [ '7.9', '8.0', 'current' ]
+        racket-version: [ '8.0', '8.1', 'current' ]
     steps:
     - uses: actions/checkout@master
     - name: Cache installed packages

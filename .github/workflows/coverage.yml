@@ -5,6 +5,7 @@ on:
     branches:
     - '*'
     paths:
+    - '**coverage.yml'
     - '**.rkt'
     - '**.scrbl'
   pull_request:
