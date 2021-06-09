@@ -34,7 +34,7 @@
   (define material-ground (lambertian (color 0.8 0.8 0.0)))
   (define material-center (lambertian (color 0.1 0.2 0.5)))
   (define material-left (dielectric 1.5))
-  (define material-right (mk-metal (color 0.8 0.6 0.2) 1.0))
+  (define material-right (mk-metal (color 0.8 0.6 0.2) 0.0))
   (define world (list
                  (sphere (point3 0.0 -100.5 -1.0) 100.0 material-ground)
                  (sphere (point3 0.0 0.0 -1.0) 0.5 material-center)
