@@ -66,23 +66,23 @@
 (define (scatter material r-in rec)
   (match material
     [(lambertian albedo)
-     (cons (ray (hit-record-p rec) (vec3-+ (hit-record-normal rec) (random-unit-vec3))) albedo)]
-    [(dielectric ref-idx)
-     (let* ([etai-over-etat (if (hit-record-front-face rec) (/ 1.0 ref-idx) ref-idx)]
+     (values (ray (hit-record-p rec) (vec3-+ (hit-record-normal rec) (random-unit-vec3))) albedo)]
+    [(dielectric ir)
+     (let* ([refraction-ratio (if (hit-record-front-face rec) (/ 1.0 ir) ir)]
             [unit-direction (unit-vector (ray-direction r-in))]
             [rec.normal (hit-record-normal rec)]
             [cos-theta (min (dot (vec3-- unit-direction) rec.normal) 1.0)]
             [sin-theta (sqrt (- 1.0 (* cos-theta cos-theta)))]
-            [reflect-or-refracted (if (> (* etai-over-etat sin-theta) 1.0)
+            [direction (if (> (* refraction-ratio sin-theta) 1.0)
                                       (reflect unit-direction rec.normal)
-                                      (refract unit-direction rec.normal etai-over-etat))])
-       (cons (ray (hit-record-p rec) reflect-or-refracted) (color 1.0 1.0 1.0)))]
+                                      (refract unit-direction rec.normal refraction-ratio))])
+       (values (ray (hit-record-p rec) direction) (color 1.0 1.0 1.0)))]
     [(metal albedo fuzz)
      (let* ([reflected (reflect (unit-vector (ray-direction r-in)) (hit-record-normal rec))]
             [scattered (ray (hit-record-p rec) (vec3-+ reflected (vec3-* fuzz (random-in-unit-sphere))))])
        (if (> (dot (ray-direction scattered) (hit-record-normal rec)) 0)
-           (cons scattered albedo)
-           #f))]))
+           (values scattered albedo)
+           (values #f #f)))]))
 
 (struct lambertian (albedo) #:transparent)
 (struct dielectric (ref-idx) #:transparent)

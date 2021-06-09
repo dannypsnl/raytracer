@@ -13,12 +13,10 @@
   (if (<= depth 0)
       (color 0 0 0)
       (if (hit? world r 0.001 +inf.0 rec)
-          (let* ([rec.mat_ptr (hit-record-mat-ptr rec)]
-                 [scattered+attenuation? (scatter rec.mat_ptr r rec)])
-            (if scattered+attenuation?
-                (let ([scattered (car scattered+attenuation?)]
-                      [attenuation (cdr scattered+attenuation?)])
-                  (vec3-* attenuation (ray-color scattered world (- depth 1))))
+          (let*-values ([(rec.mat_ptr) (hit-record-mat-ptr rec)]
+                        [(scattered attenuation) (scatter rec.mat_ptr r rec)])
+            (if (and scattered attenuation)
+                (vec3-* attenuation (ray-color scattered world (- depth 1)))
                 (color 0 0 0)))
           (let* ([unit-direction (unit-vector (ray-direction r))]
                  [t (* 0.5 (+ (vec3-y unit-direction) 1.0))])
