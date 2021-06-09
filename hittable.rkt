@@ -47,12 +47,11 @@
              (return #t))
            (set! temp (/ (- root h) a))
            (when (and (< temp max) (> temp min))
-             (begin
-               (set-hit-record-t! rec temp)
-               (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
-               (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
-               (set-hit-record-mat-ptr! rec mat-ptr)
-               (return #t)))))
+             (set-hit-record-t! rec temp)
+             (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
+             (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
+             (set-hit-record-mat-ptr! rec mat-ptr)
+             (return #t))))
        #f])))
 
 (struct sphere (center radius mat-ptr) #:transparent)
