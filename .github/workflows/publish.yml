@@ -1,7 +1,7 @@
 # This is a basic workflow to help you get started with Actions
 name: Publish
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
@@ -23,9 +23,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.racket
+            ~/.cache/racket
+            ~/.local/share/racket
           key: ${{ runner.os }}-primes
-      - uses: Bogdanp/setup-racket@v1.4
+      - uses: Bogdanp/setup-racket@v1.5
         with:
           architecture: 'x64'
           distribution: 'minimal'
@@ -33,7 +34,7 @@ jobs:
           version: '8.0'
       - name: Build
         run: |
-          raco pkg install --auto
+          raco pkg install --auto --skip-installed
           make build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
