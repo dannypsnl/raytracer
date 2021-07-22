@@ -31,7 +31,7 @@ jobs:
           architecture: 'x64'
           distribution: 'minimal'
           variant: 'CS'
-          version: '8.0'
+          version: '8.2'
       - name: Build
         run: |
           raco pkg install --auto --skip-installed
