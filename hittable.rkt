@@ -74,8 +74,8 @@
             [cos-theta (min (dot (vec3-- unit-direction) rec.normal) 1.0)]
             [sin-theta (sqrt (- 1.0 (* cos-theta cos-theta)))]
             [direction (if (> (* refraction-ratio sin-theta) 1.0)
-                                      (reflect unit-direction rec.normal)
-                                      (refract unit-direction rec.normal refraction-ratio))])
+                           (reflect unit-direction rec.normal)
+                           (refract unit-direction rec.normal refraction-ratio))])
        (values (ray (hit-record-p rec) direction) (color 1.0 1.0 1.0)))]
     [(metal albedo fuzz)
      (let* ([reflected (reflect (unit-vector (ray-direction r-in)) (hit-record-normal rec))]
