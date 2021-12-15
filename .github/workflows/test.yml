@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        racket-variant: [ 'BC', 'CS' ]
-        racket-version: [ '8.1', '8.2' ]
+        racket-variant: [ 'CS' ]
+        racket-version: [ 'stable', 'current' ]
     steps:
     - uses: actions/checkout@master
     - name: Cache installed packages
