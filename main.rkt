@@ -2,7 +2,6 @@
 
 (require "vec3.rkt"
          "ray.rkt"
-         "meta.rkt"
          "hittable.rkt"
          "camera.rkt"
          "random.rkt")
