@@ -1,7 +1,10 @@
-#lang typed/racket
+#lang typed/racket/base
 (provide (all-defined-out))
 
 (require racket/flonum
+         racket/match
+         racket/list
+         racket/math
          "random.rkt")
 
 (struct vec3
