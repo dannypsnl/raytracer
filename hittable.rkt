@@ -8,6 +8,16 @@
          "ray.rkt")
 
 (define-type hittable (U sphere))
+(struct sphere
+  ([center : vec3]
+   [radius : Flonum]
+   [mat-ptr : material])
+  #:transparent)
+
+(define (set-hit-record-face-normal! [rec : hit-record] [r : ray] [outward-normal : vec3])
+  (define front-face (fl< (dot (ray-direction r) outward-normal) 0.))
+  (set-hit-record-front-face! rec front-face)
+  (set-hit-record-normal! rec (if front-face outward-normal (vec3-- outward-normal))))
 
 (define (hit-object? [object : hittable]
                      [r : ray]
@@ -50,12 +60,12 @@
               [min : Flonum]
               [max : Flonum])
   : (Values Boolean hit-record)
+  (define closest-so-far max)
   (define rec (hit-record (vec3 0. 0. 0.)
                           (vec3 0. 0. 0.)
-                          (dielectric 0.)
+                          (lambertian (color 0.1 0.2 0.5))
                           0.
                           #f))
-  (define closest-so-far max)
   (define hit-anything? : Boolean #f)
   (for ([object objects])
     (let ([hit-this? (hit-object? object r min closest-so-far rec)])
@@ -65,12 +75,6 @@
         (set! hit-anything? #t))))
   (values hit-anything? rec))
 
-(struct sphere
-  ([center : vec3]
-   [radius : Flonum]
-   [mat-ptr : material])
-  #:transparent)
-
 (struct hit-record
   ([p : vec3]
    [normal : vec3]
@@ -79,14 +83,9 @@
    [front-face : Boolean])
   #:mutable #:transparent)
 
-(define (set-hit-record-face-normal! [rec : hit-record] [r : ray] [outward-normal : vec3])
-  (define front-face (fl< (dot (ray-direction r) outward-normal) 0.))
-  (set-hit-record-front-face! rec front-face)
-  (set-hit-record-normal! rec (if front-face outward-normal (vec3-- outward-normal))))
-
-(define (scatter [mat : material] [r-in : ray] [rec : hit-record])
+(define (scatter [r-in : ray] [rec : hit-record])
   : (Values (Option ray) (U Flonum color #f))
-  (match mat
+  (match (hit-record-mat-ptr rec)
     [(lambertian albedo)
      (values (ray (hit-record-p rec) (vec3-+ (hit-record-normal rec) (random-unit-vec3))) albedo)]
     [(dielectric ir)

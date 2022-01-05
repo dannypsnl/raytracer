@@ -16,8 +16,7 @@
       (color 0. 0. 0.)
       (let-values ([(hit-something? rec) (hit? world r 0.001 +inf.0)])
         (if hit-something?
-            (let*-values ([(rec.mat_ptr) (hit-record-mat-ptr rec)]
-                          [(scattered attenuation) (scatter rec.mat_ptr r rec)])
+            (let*-values ([(scattered attenuation) (scatter r rec)])
               (if (and scattered attenuation)
                   (vec3->color (vec3-* attenuation (ray-color scattered world (- depth 1))))
                   (color 0. 0. 0.)))
