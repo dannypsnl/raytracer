@@ -7,65 +7,63 @@
          "vec3.rkt"
          "ray.rkt")
 
-(define (hit-sphere? [hittable : sphere]
+(define-type hittable (U sphere))
+
+(define (hit-object? [object : hittable]
                      [r : ray]
                      [min : Flonum] [max : Flonum]
-                     [boxed-rec : (Boxof hit-record)])
+                     [rec : hit-record])
   : Boolean
-  (match-define (sphere center radius mat-ptr) hittable)
-  (define rec (unbox boxed-rec))
+  (match-define (sphere center radius mat-ptr) object)
   ; NOTE: convertion
   ; (-b^2 +- √b^2 - 4ac) / 2a
   ; -> (-2h^2 +- √(2h)^2 - 4ac) / 2a
   ; -> (-2h^2 +- 2√h^2 - ac) / 2a
   ; -> (-h^2 +- √h^2 - ac) / a
-  (let/cc return : Boolean
-    (define oc (vec3-- (ray-origin r) center))
-    (define a (vec3-length-squared (ray-direction r)))
-    (define h (dot oc (ray-direction r)))
-    (define c (fl- (vec3-length-squared oc) (fl* radius radius)))
-    (define discriminant (fl- (fl* h h) (fl* a c)))
-    (when (fl> discriminant 0.)
+  (define oc (vec3-- (ray-origin r) center))
+  (define a (vec3-length-squared (ray-direction r)))
+  (define h (dot oc (ray-direction r)))
+  (define c (fl- (vec3-length-squared oc) (fl* radius radius)))
+  (define discriminant (fl- (fl* h h) (fl* a c)))
+  (if (fl> discriminant 0.)
       (let* ([root (flsqrt discriminant)]
              [temp (fl/ (fl- 0. (fl+ h root)) a)])
-        (when (and (fl< temp max) (fl> temp min))
-          (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
-          (set-hit-record-mat-ptr! rec mat-ptr)
-          (set-hit-record-t! rec temp)
-          (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
-          (set-box! boxed-rec rec)
-          (return #t))
-        (set! temp (fl/ (fl- root h) a))
-        (when (and (fl< temp max) (fl> temp min))
-          (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
-          (set-hit-record-mat-ptr! rec mat-ptr)
-          (set-hit-record-t! rec temp)
-          (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
-          (set-box! boxed-rec rec)
-          (return #t))))
-    #f))
-(define (hit? [hittable : (Listof sphere)]
+        (cond
+          [(and (fl< temp max) (fl> temp min))
+           (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
+           (set-hit-record-mat-ptr! rec mat-ptr)
+           (set-hit-record-t! rec temp)
+           (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
+           #t]
+          [else (set! temp (fl/ (fl- root h) a))
+                (cond
+                  [(and (fl< temp max) (fl> temp min))
+                   (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
+                   (set-hit-record-mat-ptr! rec mat-ptr)
+                   (set-hit-record-t! rec temp)
+                   (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
+                   #t]
+                  [else #f])]))
+      #f))
+(define (hit? [objects : (Listof hittable)]
               [r : ray]
-              [min : Flonum] [max : Flonum]
-              [boxed-rec : (Boxof hit-record)])
-  : Boolean
+              [min : Flonum]
+              [max : Flonum])
+  : (Values Boolean hit-record)
+  (define rec (hit-record (vec3 0. 0. 0.)
+                          (vec3 0. 0. 0.)
+                          (dielectric 0.)
+                          0.
+                          #f))
   (define closest-so-far max)
   (define hit-anything? : Boolean #f)
-  (for ([sphere hittable])
-    (let ([hit-this? (hit-sphere? sphere r min closest-so-far boxed-rec)])
+  (for ([object objects])
+    (let ([hit-this? (hit-object? object r min closest-so-far rec)])
       (when hit-this?
-        (define temp-rec (unbox boxed-rec))
-        (set! closest-so-far (hit-record-t temp-rec))
-        ; rec = temp-rec
-        (set-box! boxed-rec
-                  (hit-record (hit-record-p temp-rec)
-                              (hit-record-normal temp-rec)
-                              (hit-record-mat-ptr temp-rec)
-                              (hit-record-t temp-rec)
-                              (hit-record-front-face temp-rec)))
+        (set! closest-so-far (hit-record-t rec))
         ; hit-anything?
         (set! hit-anything? #t))))
-  hit-anything?)
+  (values hit-anything? rec))
 
 (struct sphere
   ([center : vec3]
@@ -78,11 +76,12 @@
    [normal : vec3]
    [mat-ptr : (U lambertian dielectric metal)]
    [t : Flonum]
-   [front-face : Any])
+   [front-face : Boolean])
   #:mutable #:transparent)
 
 (define (set-hit-record-face-normal! [rec : hit-record] [r : ray] [outward-normal : vec3])
   (define front-face (fl< (dot (ray-direction r) outward-normal) 0.))
+  (set-hit-record-front-face! rec front-face)
   (set-hit-record-normal! rec (if front-face outward-normal (vec3-- outward-normal))))
 
 (define (scatter [material : (U lambertian dielectric metal)] [r-in : ray] [rec : hit-record])

@@ -12,26 +12,20 @@
                    [world : (Listof sphere)]
                    [depth : Integer])
   : color
-  (define boxed-rec (box (hit-record (vec3 0. 0. 0.)
-                                     (vec3 0. 0. 0.)
-                                     (dielectric 0.)
-                                     0.
-                                     #f)))
-
   (if (<= depth 0)
       (color 0. 0. 0.)
-      (if (hit? world r 0.001 +inf.0 boxed-rec)
-          (let*-values ([(rec) (unbox boxed-rec)]
-                        [(rec.mat_ptr) (hit-record-mat-ptr rec)]
-                        [(scattered attenuation) (scatter rec.mat_ptr r rec)])
-            (if (and scattered attenuation)
-                (vec3->color (vec3-* attenuation (ray-color scattered world (- depth 1))))
-                (color 0. 0. 0.)))
-          (let* ([unit-direction (unit-vector (ray-direction r))]
-                 [t (fl* 0.5 (fl+ (vec3-y unit-direction) 1.0))])
-            (vec3->color
-             (vec3-+ (vec3-* (fl- 1.0 t) (color 1.0 1.0 1.0))
-                     (vec3-* t (color 0.5 0.7 1.0))))))))
+      (let-values ([(hit-something? rec) (hit? world r 0.001 +inf.0)])
+        (if hit-something?
+            (let*-values ([(rec.mat_ptr) (hit-record-mat-ptr rec)]
+                          [(scattered attenuation) (scatter rec.mat_ptr r rec)])
+              (if (and scattered attenuation)
+                  (vec3->color (vec3-* attenuation (ray-color scattered world (- depth 1))))
+                  (color 0. 0. 0.)))
+            (let* ([unit-direction (unit-vector (ray-direction r))]
+                   [t (fl* 0.5 (fl+ (vec3-y unit-direction) 1.0))])
+              (vec3->color
+               (vec3-+ (vec3-* (fl- 1.0 t) (color 1.0 1.0 1.0))
+                       (vec3-* t (color 0.5 0.7 1.0)))))))))
 
 (module+ main
   ; Image
