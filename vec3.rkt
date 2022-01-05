@@ -113,11 +113,11 @@
   (vec3-/ v (vec3-length v)))
 
 (define (random-unit-vec3) : vec3
-  (let* ([a (random-double 0 (* 2 pi))]
-         [z (random-double -1 1)]
-         [r (flsqrt (- 1 (* z z)))])
-    (vec3 (fl* r (cos a))
-          (fl* r (sin a))
+  (let* ([a (random-double 0. (fl* 2. pi))]
+         [z (random-double -1. 1.)]
+         [r (flsqrt (fl- 1. (fl* z z)))])
+    (vec3 (fl* r (flcos a))
+          (fl* r (flsin a))
           z)))
 
 (define (random-in-unit-sphere) : vec3

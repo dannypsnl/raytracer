@@ -1,8 +1,7 @@
-#lang racket
-
+#lang typed/racket/base
 (provide random-double)
 
-(require racket/performance-hint)
+(require racket/flonum)
 
-(define-inline (random-double [min 0] [max 1])
-  (+ min (* (- max min) (random))))
+(define (random-double [min : Flonum 0.] [max : Flonum 1.]) : Flonum
+  (fl+ min (fl* (fl- max min) (flrandom (current-pseudo-random-generator)))))
