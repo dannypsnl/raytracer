@@ -1,8 +1,9 @@
-#lang typed/racket
+#lang typed/racket/base
 (provide (struct-out ray)
          ray-at)
 
-(require "vec3.rkt")
+(require racket/match
+         "vec3.rkt")
 
 (struct ray
   ([origin : vec3]
