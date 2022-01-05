@@ -15,7 +15,7 @@
   #:transparent)
 
 (define (set-hit-record-face-normal! [rec : hit-record] [r : ray] [outward-normal : vec3])
-  (define front-face (fl< (dot (ray-direction r) outward-normal) 0.))
+  (define front-face (< (dot (ray-direction r) outward-normal) 0))
   (set-hit-record-front-face! rec front-face)
   (set-hit-record-normal! rec (if front-face outward-normal (vec3-- outward-normal))))
 
@@ -35,25 +35,25 @@
   (define h (dot oc (ray-direction r)))
   (define c (fl- (vec3-length-squared oc) (fl* radius radius)))
   (define discriminant (fl- (fl* h h) (fl* a c)))
-  (if (fl> discriminant 0.)
+  (if (> discriminant 0)
       (let* ([root (flsqrt discriminant)]
-             [temp (fl/ (fl- 0. (fl+ h root)) a)])
+             [temp1 (fl/ (fl- 0. (fl+ h root)) a)]
+             [temp2 (fl/ (fl- root h) a)])
+        (define outward-normal (vec3-/ (vec3-- (hit-record-p rec) center) radius))
         (cond
-          [(and (fl< temp max) (fl> temp min))
+          [(< min temp1 max)
            (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
+           (set-hit-record-t! rec temp1)
            (set-hit-record-mat-ptr! rec mat-ptr)
-           (set-hit-record-t! rec temp)
-           (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
+           (set-hit-record-face-normal! rec r outward-normal)
            #t]
-          [else (set! temp (fl/ (fl- root h) a))
-                (cond
-                  [(and (fl< temp max) (fl> temp min))
-                   (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
-                   (set-hit-record-mat-ptr! rec mat-ptr)
-                   (set-hit-record-t! rec temp)
-                   (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
-                   #t]
-                  [else #f])]))
+          [(< min temp2 max)
+           (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
+           (set-hit-record-t! rec temp2)
+           (set-hit-record-mat-ptr! rec mat-ptr)
+           (set-hit-record-face-normal! rec r outward-normal)
+           #t]
+          [else #f]))
       #f))
 (define (hit? [objects : (Listof hittable)]
               [r : ray]
