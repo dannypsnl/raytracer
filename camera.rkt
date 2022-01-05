@@ -26,7 +26,7 @@
             horizontal
             vertical)))
 
-(define (camera-get-ray [c : camera] [u : vec3] [v : vec3])
+(define (camera-get-ray [c : camera] [u : Flonum] [v : Flonum])
   (ray (camera-origin c)
        (vec3--
         (vec3-+ (camera-lower-left-corner c)

@@ -1,8 +1,9 @@
-#lang typed/racket
+#lang typed/racket/base
 
 (provide (all-defined-out))
 
 (require racket/flonum
+         racket/match
          "vec3.rkt"
          "ray.rkt")
 
@@ -22,20 +23,20 @@
     (define oc (vec3-- (ray-origin r) center))
     (define a (vec3-length-squared (ray-direction r)))
     (define h (dot oc (ray-direction r)))
-    (define c (- (vec3-length-squared oc) (* radius radius)))
-    (define discriminant (- (* h h) (* a c)))
-    (when (> discriminant 0)
-      (let* ([root (sqrt discriminant)]
-             [temp (/ (- (+ h root)) a)])
-        (when (and (< temp max) (> temp min))
+    (define c (fl- (vec3-length-squared oc) (fl* radius radius)))
+    (define discriminant (fl- (fl* h h) (fl* a c)))
+    (when (fl> discriminant 0.)
+      (let* ([root (flsqrt discriminant)]
+             [temp (fl/ (fl- 0. (fl+ h root)) a)])
+        (when (and (fl< temp max) (fl> temp min))
           (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
           (set-hit-record-mat-ptr! rec mat-ptr)
           (set-hit-record-t! rec temp)
           (set-hit-record-face-normal! rec r (vec3-/ (vec3-- (hit-record-p rec) center) radius))
           (set-box! boxed-rec rec)
           (return #t))
-        (set! temp (/ (- root h) a))
-        (when (and (< temp max) (> temp min))
+        (set! temp (fl/ (fl- root h) a))
+        (when (and (fl< temp max) (fl> temp min))
           (set-hit-record-p! rec (ray-at r (hit-record-t rec)))
           (set-hit-record-mat-ptr! rec mat-ptr)
           (set-hit-record-t! rec temp)
@@ -71,13 +72,13 @@
 (struct sphere
   ([center : vec3]
    [radius : Flonum]
-   [mat-ptr : Any])
+   [mat-ptr : (U lambertian dielectric metal)])
   #:transparent)
 
 (struct hit-record
   ([p : vec3]
    [normal : vec3]
-   [mat-ptr : Any]
+   [mat-ptr : (U lambertian dielectric metal)]
    [t : Flonum]
    [front-face : Any])
   #:mutable #:transparent)
@@ -104,16 +105,16 @@
     [(metal albedo fuzz)
      (let* ([reflected (reflect (unit-vector (ray-direction r-in)) (hit-record-normal rec))]
             [scattered (ray (hit-record-p rec) (vec3-+ reflected (vec3-* fuzz (random-in-unit-sphere))))])
-       (if (> (dot (ray-direction scattered) (hit-record-normal rec)) 0)
+       (if (fl> (dot (ray-direction scattered) (hit-record-normal rec)) 0.)
            (values scattered albedo)
            (values #f #f)))]))
 
-(struct lambertian ([albedo : Flonum]) #:transparent)
+(struct lambertian ([albedo : color]) #:transparent)
 (struct dielectric ([ref-idx : Flonum]) #:transparent)
 (struct metal
-  ([albedo : Flonum]
+  ([albedo : color]
    [fuzz : Flonum])
   #:transparent)
 
-(define (mk-metal [a : Flonum] [f : Flonum])
+(define (mk-metal [a : color] [f : Flonum])
   (metal a (if (fl< f 1.) f 1.)))
