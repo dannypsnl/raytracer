@@ -68,13 +68,13 @@
 (struct sphere
   ([center : vec3]
    [radius : Flonum]
-   [mat-ptr : (U lambertian dielectric metal)])
+   [mat-ptr : material])
   #:transparent)
 
 (struct hit-record
   ([p : vec3]
    [normal : vec3]
-   [mat-ptr : (U lambertian dielectric metal)]
+   [mat-ptr : material]
    [t : Flonum]
    [front-face : Boolean])
   #:mutable #:transparent)
@@ -84,9 +84,9 @@
   (set-hit-record-front-face! rec front-face)
   (set-hit-record-normal! rec (if front-face outward-normal (vec3-- outward-normal))))
 
-(define (scatter [material : (U lambertian dielectric metal)] [r-in : ray] [rec : hit-record])
+(define (scatter [mat : material] [r-in : ray] [rec : hit-record])
   : (Values (Option ray) (U Flonum color #f))
-  (match material
+  (match mat
     [(lambertian albedo)
      (values (ray (hit-record-p rec) (vec3-+ (hit-record-normal rec) (random-unit-vec3))) albedo)]
     [(dielectric ir)
@@ -106,6 +106,7 @@
            (values scattered albedo)
            (values #f #f)))]))
 
+(define-type material (U lambertian dielectric metal))
 (struct lambertian ([albedo : color]) #:transparent)
 (struct dielectric ([ref-idx : Flonum]) #:transparent)
 (struct metal
