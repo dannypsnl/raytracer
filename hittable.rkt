@@ -47,10 +47,8 @@
 (define (hit? [hittable : (Listof sphere)]
               [r : ray]
               [min : Flonum] [max : Flonum]
-              [rec : (Boxof hit-record)])
+              [boxed-rec : (Boxof hit-record)])
   : Boolean
-  (define boxed-rec (cast (box #f)
-                          (Boxof hit-record)))
   (define closest-so-far max)
   (define hit-anything? : Boolean #f)
   (for ([sphere hittable])

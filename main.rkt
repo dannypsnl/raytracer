@@ -12,8 +12,11 @@
                    [world : (Listof sphere)]
                    [depth : Integer])
   : color
-  (define boxed-rec (cast (box #f)
-                          (Boxof hit-record)))
+  (define boxed-rec (box (hit-record (vec3 0. 0. 0.)
+                                     (vec3 0. 0. 0.)
+                                     (dielectric 0.)
+                                     0.
+                                     #f)))
 
   (if (<= depth 0)
       (color 0. 0. 0.)
