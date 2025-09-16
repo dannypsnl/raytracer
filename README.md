@@ -8,3 +8,11 @@
 ```shell
 racket main.rkt > image.ppm
 ```
+
+
+## C++ version
+
+```
+clang++ -O3 main.cc
+./a.out > image.ppm
+```
